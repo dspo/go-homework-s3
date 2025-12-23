@@ -6,6 +6,44 @@ info:
     # 功能
         
     本项目要求开发者实现一个即时聊天系统，支持单聊和基于话题的群聊。
+    
+    # 接口
+    
+    开发者需实现一些常规的 RESTful APIs 以及一个 Websocket API。
+    
+    # 消息
+    
+    用户向另一个用户发送消息，或者发送关于 topic 的消息，总是通过 HTTP 接口发送。
+    服务端向用户推送消息（服务端转发的来自其他用户的消息和系统消息）总是通过 Websocket。
+    
+    消息体中用 `from` 表示消息的发送者，`to` 表示消息的接收者。
+    
+    ```json
+    {
+      "from": "Harry",
+      "to": ["Ron", "Hermione"]
+    }
+    ```
+    
+    如上示例表示 Harry 将消息发送给 Ron 和 Hermione（这不是群聊，是批量发送）。
+    
+    服务端接收到来自 Harry 的这则上行消息后，会检查 `to` 列表，然后将消息分别转发给 Ron 和 Hermione。
+    当然，这其中还有些检查 Ron 和 Hermione 在线状态等流程不题。
+    
+    如果消息体中有 `topic` 则一般表示群聊（系统消息也会有 topic 字段但不属于群聊）。
+    
+    
+    ```json
+    {
+      "from": "Harry",
+      "to": ["Ron", "Hermione"],
+      "topic": "philosophers_stone"
+    }
+    ```
+    
+    当服务端接收到 Harry 的这则消息，会将消息转发给**所有参与**了 "philosophers_stone" 这个话题的人。
+    **注意**，此处不仅仅要将消息转发给 Ron 和 Hermione，而是**所有参与了该 topic 的人**。
+    此处的 `to` 字段仅仅表示提及，相当于即时聊天 APP 中用 `@username` 提及某人。
 paths:
   /healthz:
     get:
