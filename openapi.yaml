@@ -123,9 +123,7 @@ paths:
       operationId: createTopic
       summary: 创建话题
       description: |-
-        显式地创建话题。
-
-        注意：话题可以显式地创建，也可以隐式的创建。详情见后续关于 topic 的接口。
+        话题必须先创建才能使用。
       requestBody:
         required: true
         content:
@@ -232,6 +230,8 @@ paths:
                 - $ref: '#/components/schemas/Ack'
                 - $ref: '#/components/schemas/P2PDown'
                 - $ref: '#/components/schemas/P2TDown'
+                - $ref: '#/components/schemas/SystemDownTopicIsDeleted'
+                - $ref: '#/components/schemas/SystemDownTopicNotFound'
       responses:
         200: { description: OK }
         400:
@@ -439,6 +439,50 @@ components:
         content:
           type: string
           description: 消息内容文本
+    SystemDownTopicIsDeleted:
+      title: 系统下发消息-Topic已被删除
+      description: |-
+        系统下发的消息，当 topic 被删除时下发此消息，告知客户端 topic 已经被删除了。
+        客户端可能会根据消息作出一些反应。
+      properties:
+        message-type:
+          enum:
+            - system
+        topic:
+          type: string
+          enum:
+            - __topic_is_deleted__
+        content-type:
+          type: string
+          enum:
+            - application/json
+        content:
+          type: object
+          properties:
+            topic:
+              $ref: "#/components/schemas/topic"
+    SystemDownTopicNotFound:
+      title: 系统下发消息-TopicNotFound
+      description: |-
+        当客户端在消息中使用了不存在的 topic，服务端将下发本消息，并且不会做任何转发。
+      properties:
+        message-type:
+          enum:
+            - system
+        topic:
+          type: string
+          enum:
+            - __topic_not_found__
+        content-type:
+          type: string
+          enum:
+            - application/json
+        content:
+          type: object
+          properties:
+            topic:
+              $ref: "#/components/schemas/topic"
+
   responses:
     default:
       description: Error response
